@@ -1,5 +1,7 @@
-# 创建一个手工表
-## 维度表
+# 常用PBI DAX笔记
+
+## 创建一个手工表
+### 维度表
 杜邦分析指标 = DataTable("一级指标", STRING,
                "二级指标", STRING,
                "三级指标", STRING,  
@@ -15,7 +17,7 @@
                 }  
            )
 
-## 简单的维度表
+### 简单的维度表
 财务指标 = DATATABLE(
     "财务指标", STRING,
     {
@@ -24,8 +26,8 @@
     }
 )
 
-# 日期维度表的创建
-## 创建日期表，英文
+## 日期维度表的创建
+### 创建日期表，英文
 DimDate = 
     VAR startdate = DATE(2024, 1, 1)
     VAR enddate = DATE(2024, 12, 31)
@@ -45,7 +47,7 @@ DimDate =
         "YearMonth", FORMAT([Date], "yyyy-mm")
     )
 
-## 创建日期表，中文
+### 创建日期表，中文
 日期表 = 
     VAR startdate = DATE(2020, 1, 1)
     VAR enddate = DATE(2030, 12, 31)
@@ -60,15 +62,15 @@ DimDate =
         "是否周末", IF(WEEKDAY([Date], 2) > 5, "是", "否")
 )
 
-## 创建日期表，根据事实表，只创建Date，后续需足迹创建年月周日等字段
+### 创建日期表，根据事实表，只创建Date，后续需足迹创建年月周日等字段
 日期表=CALENDARAUTO()
 
 
-# 日期计算
-## 周环比 
+## 日期计算
+### 周环比 
 周环比金额 = CALCULATE([Sales Amount], DATEADD('DimDate'[Date], -7, DAY))
 
-## 同比环比
+### 同比环比
 环比 = 
 VAR CurrentValue = SUM('表名'[数值列]) 
 VAR PreviousValue = CALCULATE( SUM('表名'[数值列]), DATEADD('日期表'[日期], -1, MONTH) // 假设按月份比较，-1表示上一个月 ) 
@@ -78,7 +80,7 @@ VAR CurrentValue = SUM('表名'[数值列])
 VAR PreviousYearValue = CALCULATE( SUM('表名'[数值列]), SAMEPERIODLASTYEAR('日期表'[日期]) // 自动匹配去年同期 ) 
 RETURN IF(PreviousYearValue = 0, 0, (CurrentValue - PreviousYearValue) / PreviousYearValue)
 
-## YTD QTD
+### YTD QTD
 销售额 YTD = TOTALYTD( SUM('销售表'[销售额]), '日期表'[日期] )
 财年销售额 YTD = TOTALYTD( SUM('销售表'[销售额]), '日期表'[日期], , // 无额外筛选时留空 
 3 // 年度结束于3月 )
@@ -86,7 +88,7 @@ RETURN IF(PreviousYearValue = 0, 0, (CurrentValue - PreviousYearValue) / Previou
 销售额 QTD = TOTALQTD( SUM('销售表'[销售额]), '日期表'[日期] )
 
 
-# 占比，产品分类占比
+## 占比，产品分类占比
 假定产品维度为：产品类别，产品名称
 绝对占比，占比分母为维度下所有成员。
 总体占比 = DIVIDE([销售额：合集], CALCULATE([销售额：合集], ALL('产品')))
@@ -97,18 +99,18 @@ RETURN IF(PreviousYearValue = 0, 0, (CurrentValue - PreviousYearValue) / Previou
 分类占比 = DIVIDE([销售额：合集], CALCULATE([销售额：合集], ALLSELECTED('产品'[产品名称])))
 
 
-# Filter
-## 基本：
+## Filter
+### 基本：
 华东地区销售 = FILTER(Sales, Sales[Region] = "华东")
-## 配合聚合函数：
+### 配合聚合函数：
 华东总销售额 = SUMX( FILTER(Sales, Sales[Region] = "华东"),  Sales[Amount] )
-## 与CLACULATE配合
+### 与CLACULATE配合
 高价产品销售额 = CALCULATE( SUM(Sales[Amount]), FILTER(Sales, Sales[UnitPrice] > 100) )
-## 多条件：
+### 多条件：
 华东大额销售 = FILTER( Sales, Sales[Region] = "华东" && Sales[Amount] > 1000 )
 
 
-# SWITCH
+## SWITCH
 SWITCH(
     TRUE(),  // 表达式为TRUE，通过后续条件判断匹配
     SELECTEDVALUE('财务指标'[财务指标])="收入", [收入],  // 若选择“收入”，返回[收入]度量值
@@ -117,7 +119,7 @@ SWITCH(
 )
 
 
-# 累计占比
+## 累计占比
 累计占⽐% =
 VAR vSales = [Sales]
 VAR SumALL = SUMX( ALLSELECTED( 'Dim 产品'[产品⼦类别] ) , [Sales] )
