@@ -113,29 +113,38 @@ RETURN IF(PreviousYearValue = 0, 0, (CurrentValue - PreviousYearValue) / Previou
 
 ## Filter
 ### 基本：
+``` DAX
 华东地区销售 = FILTER(Sales, Sales[Region] = "华东")
+```
 ### 配合聚合函数：
+``` DAX
 华东总销售额 = SUMX( FILTER(Sales, Sales[Region] = "华东"),  Sales[Amount] )
+```
 ### 与CLACULATE配合
+``` DAX
 高价产品销售额 = CALCULATE( SUM(Sales[Amount]), FILTER(Sales, Sales[UnitPrice] > 100) )
+```
 ### 多条件：
+``` DAX
 华东大额销售 = FILTER( Sales, Sales[Region] = "华东" && Sales[Amount] > 1000 )
-
+```
 
 ## SWITCH
+``` DAX
 SWITCH(
     TRUE(),  // 表达式为TRUE，通过后续条件判断匹配
     SELECTEDVALUE('财务指标'[财务指标])="收入", [收入],  // 若选择“收入”，返回[收入]度量值
     SELECTEDVALUE('财务指标'[财务指标])="利润", [利润贡献],  // 若选择“利润”，返回[利润贡献]度量值
     BLANK()  // 无匹配时返回空值
 )
-
+```
 
 ## 累计占比
+``` DAX
 累计占⽐% =
 VAR vSales = [Sales]
 VAR SumALL = SUMX( ALLSELECTED( 'Dim 产品'[产品⼦类别] ) , [Sales] )
 VAR RunningSum =
 SUMX( FILTER( ALLSELECTED( 'Dim 产品'[产品⼦类别] ) , [Sales] >= vSales ) , [Sales] )
 RETURN DIVIDE( RunningSum , SumALL )
-
+```
